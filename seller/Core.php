@@ -65,24 +65,25 @@ class System {
     }
 
     public function listProduct() {
-        $user = $this->userInfo();
-        $id_u = $user['id_user'];
-        $result = mysqli_query($this->connect(), "SELECT * FROM `product` WHERE `id_restaurant`='".$id_u."' ORDER BY id_product  DESC");
+        $id_res = $this->restaurant()['id_restaurant']; // id cửa hàng
+        $result = mysqli_query($this->connect(), "SELECT * FROM `product` WHERE `id_restaurant`='".$id_res."' ORDER BY id_product DESC");
         return $result;
     }
     
     public function listOrder() {
+        $id_res = $this->restaurant()['id_restaurant']; // id cửa hàng
         $result = mysqli_query($this->connect(), "SELECT * FROM `orders` 
         RIGHT JOIN product 
-        ON orders.id_product = product.id_product WHERE status_order = 0
+        ON orders.id_product = product.id_product WHERE status_order = 0 AND orders.id_restaurant = '".$id_res."'
         ORDER BY orders.id_order DESC");
         return $result;
     }
 
     public function listOrderAll() {
+        $id_res = $this->restaurant()['id_restaurant']; // id cửa hàng
         $result = mysqli_query($this->connect(), "SELECT * FROM `orders` 
         RIGHT JOIN product 
-        ON orders.id_product = product.id_product WHERE status_order != 0
+        ON orders.id_product = product.id_product WHERE status_order != 0 AND orders.id_restaurant = '".$id_res."'
         ORDER BY orders.id_order DESC");
         return $result;
     }
@@ -93,35 +94,45 @@ class System {
         $id_u = $user['id_user'];
         // Top 3 sản phẩm
         $id_res = $this->restaurant()['id_restaurant'];
-        $top_products = mysqli_query($this->connect(), "SELECT id_product, COUNT(*) as total FROM orders group by id_product order by COUNT(*) desc limit 3");
+        $top_products = mysqli_query($this->connect(), "SELECT id_product, COUNT(*) as total FROM orders WHERE id_restaurant = '".$id_res."' group by id_product order by COUNT(*) desc limit 3");
+
+        // Tổng số món cửa hàng
+        $total_product = mysqli_query($this->connect(), "SELECT COUNT(id_product) as total FROM `product` WHERE `id_restaurant`='".$id_res."'")->fetch_array();
 
         // Chi tiết đơn hàng
-        $order_new = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_user`='".$id_u."' AND status_order >= 0 AND status_order <= 3 AND create_at = '".date( "Y-m-d")."'")->fetch_array();
-        $order_wait = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_user`='".$id_u."' AND status_order = 0")->fetch_array();
-        $order_done = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_user`='".$id_u."' AND status_order = 1")->fetch_array();
-        $order_cannel = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_user`='".$id_u."' AND status_order = 5")->fetch_array();
+        $order_new = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND status_order >= 0 AND status_order <= 3 AND create_at = '".date( "Y-m-d")."'")->fetch_array();
+        $order_wait = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND status_order = 0")->fetch_array();
+        $order_done = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND status_order = 1")->fetch_array();
+        $order_cannel = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND status_order = 5")->fetch_array();
         // Danh thu ngày/tuần/tháng
-        $total_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE `id_user`='".$id_u."' AND status_order = 1")->fetch_array();
-        $today_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE `id_user`='".$id_u."' AND create_at = '".date( "Y-m-d")."' AND status_order = 1")->fetch_array();
-        $week_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE WEEKOFYEAR(create_at) = WEEKOFYEAR(CURDATE()) AND WEEKDAY('".date( "Y-m-d")."') BETWEEN 1 AND WEEKDAY(CURDATE()) AND id_user = '".$id_u."' AND status_order = 1")->fetch_array();
-        $month_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE create_at BETWEEN DATE_FORMAT(CURDATE() ,'%Y-%m-01') AND CURDATE() AND id_user = '".$id_u."' AND status_order = 1")->fetch_array();
+        $total_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND status_order = 1")->fetch_array();
+        $today_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND create_at = '".date( "Y-m-d")."' AND status_order = 1")->fetch_array();
+        $week_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE WEEKOFYEAR(create_at) = WEEKOFYEAR(CURDATE()) AND WEEKDAY('".date( "Y-m-d")."') BETWEEN 1 AND WEEKDAY(CURDATE()) AND id_restaurant = '".$id_res."' AND status_order = 1")->fetch_array();
+        $month_money = mysqli_query($this->connect(), "SELECT SUM(total) as total FROM `orders` WHERE create_at BETWEEN DATE_FORMAT(CURDATE() ,'%Y-%m-01') AND CURDATE() AND id_restaurant = '".$id_res."' AND status_order = 1")->fetch_array();
         // Đơn hàng ngày/tuần/tháng
-        $today_order = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_user`='".$id_u."' AND create_at = '".date( "Y-m-d")."' AND status_order >= 0 AND status_order <= 3")->fetch_array();
+        $today_order = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE `id_restaurant`='".$id_res."' AND create_at = '".date( "Y-m-d")."' AND status_order >= 0 AND status_order <= 3")->fetch_array();
         $week_order = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE WEEKOFYEAR(create_at) = WEEKOFYEAR(CURDATE()) AND WEEKDAY('".date( "Y-m-d")."') BETWEEN 1 AND WEEKDAY(CURDATE()) AND status_order >= 0 AND status_order <= 3")->fetch_array();
-        $month_order = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE create_at BETWEEN DATE_FORMAT(CURDATE() ,'%Y-%m-01') AND CURDATE() AND id_user = '".$id_u."'  AND status_order >= 0 AND status_order <= 3")->fetch_array();
+        $month_order = mysqli_query($this->connect(), "SELECT COUNT(id_order) as total FROM `orders` WHERE create_at BETWEEN DATE_FORMAT(CURDATE() ,'%Y-%m-01') AND CURDATE() AND id_restaurant = '".$id_res."'  AND status_order >= 0 AND status_order <= 3")->fetch_array();
         $data = array(
+            // Top 3 sản phẩm
             'top_products' => $top_products,
 
+            // Tổng số món cửa hàng
+            'total_product' => $total_product['total'],
+
+            // Chi tiết đơn hàng
             'order_new' => $order_new['total'],
             'order_wait' => $order_wait['total'],
             'order_done' => $order_done['total'],
             'order_cannel' => $order_cannel['total'],
 
+            // Danh thu ngày/tuần/tháng
             'total_money' => $total_money['total'],
             'today_money' => $today_money['total'],
             'week_money' => $week_money['total'],
             'month_money' => $month_money['total'],
 
+            // Đơn hàng ngày/tuần/tháng
             'today_order' => $today_order['total'],
             'week_order' => $week_order['total'],
             'month_order' => $month_order['total'],

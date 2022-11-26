@@ -3,8 +3,8 @@
   <div>
     <div class="logo-wrapper text-center">
       <a href="index.php">
-        <img class="img-fluid for-light" style="height: 25px;" src="<?=BASE_URL?>/assets/images/logo.png" alt="">
-        <img class="img-fluid for-dark" style="height: 25px;" src="<?=BASE_URL?>/assets/images/logo.png" alt="">
+        <img class="img-fluid for-light" style="height: 25px;" src="<?=BASE_URL?>/assets/images/logo.png?e=<?=time()?>" alt="">
+        <img class="img-fluid for-dark" style="height: 25px;" src="<?=BASE_URL?>/assets/images/logo.png?e=<?=time()?>" alt="">
       </a>
       <div class="back-btn"><i class="fa fa-angle-left"></i></div>
     </div>

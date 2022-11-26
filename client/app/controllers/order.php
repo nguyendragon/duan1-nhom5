@@ -27,22 +27,22 @@
 			}
 		}
 
-		public function addOrders(){
+		public function addOrders(){ 
 			$this->checkLogin();
 			$user_model = $this->load->model('usermodel');
 			$order_model = $this->load->model('ordermodel');
 			$token = $_SESSION['token'];
 
-			$create_at = date("d M Y, H:i a");
+			$create_at = date("Y-m-d");
 			$time = time();
 			
 			$userInfo = $user_model->getUserBySession($token);
 			$addressDefault = $user_model->addressDefault($userInfo['id_user']);
-
+ 
 			if ($addressDefault) {
 				foreach ($_SESSION['cart'] as $index => $item) {
 					$total = ($item['price'] * $item['sl']) - ($item['sale'] * $item['sl']);
-					$order_model->addOrders($item['sl'], $item['sale'], $item['price'], $total, $item['id'], $userInfo['id_user'], $create_at, $time);
+					$order_model->addOrders($item['sl'], $item['sale'], $item['price'], $total, $item['id'], $item['id_restaurant'], $userInfo['id_user'], $create_at, $time);
 				}
 				unset($_SESSION['cart']);
 				echo $this->res_json('1', "Xác nhận thành công!");

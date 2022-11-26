@@ -6,8 +6,8 @@
   <?php include_once "config.php" ?>
   <?php include_once "Core.php" ?>
   <?php
-    $dragon = new System;
-    $list_cate = $dragon->listCategory();
+  $dragon = new System;
+  $list_pro = $dragon->listProduct();
   ?>
   <style>
     .preview-img {
@@ -26,7 +26,14 @@
     .ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused {
       min-height: 200px;
     }
+
+    .img-flag {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
   </style>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -61,37 +68,37 @@
                   <!-- action="" method="post" -->
                   <form class="needs-validation" novalidate="">
                     <div class="row g-3 mb-4">
+                      <div class="col-md-12">
+                        <label class="form-label" for="id_product">Sản phẩm</label>
+                        <select class="form-select" id="id_product" onchange="getProById()" required="">
+                          <option value="">----- Chọn Sản phẩm -----</option>
+                          <?php foreach ($list_pro as $key => $value) : ?>
+                            <option thumbnail="<?= $value['image'] ?>" value="<?= $value['id_product'] ?>"><?= $value['name_product'] ?></option>
+                          <?php endforeach ?>
+                        </select>
+                        <div class="invalid-feedback">Vui lòng chọn một trạng thái hợp lệ.</div>
+                      </div>
                       <div class="col-md-4">
                         <label class="form-label" for="name_product">Tên sản phẩm</label>
-                        <input class="form-control" id="name_product" type="text" value="" placeholder="Nhập tên sản phẩm" required="">
+                        <input class="form-control" id="name_product" disabled type="text" value="" placeholder="Nhập tên sản phẩm" required="">
                         <div class="invalid-feedback">Vui lòng nhập tên sản phẩm.</div>
                       </div>
                       <div class="col-md-4">
                         <label class="form-label" for="price_product">Giá sản phẩm</label>
-                        <input class="form-control" id="price_product" type="text" value="" placeholder="Nhập giá sản phẩm" required="">
+                        <input class="form-control" id="price_product" disabled type="text" value="" placeholder="Nhập giá sản phẩm" required="">
                         <div class="invalid-feedback">Vui lòng nhập giá sản phẩm.</div>
                       </div>
                       <div class="col-md-4">
                         <label class="form-label" for="sale_product">Giảm giá</label>
-                        <input class="form-control" id="sale_product" type="text" value="0" placeholder="Giảm giá" required="">
+                        <input class="form-control" id="sale_product" disabled type="text" value="0" placeholder="Giảm giá" required="">
                         <div class="invalid-feedback">Vui lòng nhập giảm giá.</div>
                       </div>
                     </div>
                     <div class="row g-3 mb-4">
-                      <div class="col-md-6">
-                        <label class="form-label" for="value3">Hình ảnh sản phẩm (162px x 162px)</label>
-                        <input class="form-control" onchange="readURL(this)" id="img_product" type="file" aria-label="file example" required="">
-                        <div class="invalid-feedback">Vui lòng tải hình ảnh lên</div>
-                      </div>
-                      <div class="col-md-3">
-                        <label class="form-label" for="id_category">Danh mục sản phẩm</label>
-                        <select class="form-select" id="id_category" required="">
-                          <option value="">----- Chọn thể loại -----</option>
-                          <?php foreach ($list_cate as $key => $value) : ?>
-                            <option data-thumbnail="<?=BASE_URL?>/assets/images/logo.png" value="<?= $value['id_cate'] ?>"><?= $value['name_category'] ?></option>
-                          <?php endforeach ?>
-                        </select>
-                        <div class="invalid-feedback">Vui lòng chọn một trạng thái hợp lệ.</div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label" for="amount">Số lượng</label>
+                        <input class="form-control" id="amount" type="number" value="1" placeholder="Nhập số lượng">
+                        <div class="invalid-feedback"></div>
                       </div>
                       <div class="col-md-3 mb-3">
                         <label class="form-label" for="value5">Voucher</label>
@@ -101,15 +108,20 @@
                     </div>
                     <div class="row g-3 mb-4">
                       <div class="col-md-12 preview-img">
-                        <p id="image-show1">HÌNH ẢNH ĐƯỢC TẢI LÊN</p>
+                        <p id="image-show1">HÌNH ẢNH SẢN PHẨM</p>
                         <img id="image-show" width="162px" height="162px" src="" title="" style="display: none;">
                       </div>
                     </div>
                     <div class="row g-3 mb-4">
                       <div class="col-md-12">
                         <div id="editor">
-                          Nhập thông tin sản phẩm
+                          Ghi chú đơn hàng này
                         </div>
+                      </div>
+                    </div>
+                    <div class="row g-3 mb-4">
+                      <div class="col-md-12 mb-3 bg-primary p-2">
+                          <h4>Tổng đơn hàng: </h4>
                       </div>
                     </div>
                     <div class="mb-3">
@@ -167,42 +179,15 @@
         console.error(error);
       });
 
-    function readURL(input) {
-      if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          $('#image-show1').fadeOut(0);
-          $('#image-show').fadeIn(0);
-          $("#image-show").attr("src", e.target.result).width(162)
-            .height(162);
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
     $("#add_product").click(function(e) {
       e.preventDefault();
-      let fd = new FormData();
-      let files = $('#img_product')[0].files;
-      let name_product = $('#name_product').val().trim();
-      let price_product = $('#price_product').val().trim();
-      let id_category = $('#id_category').val().trim();
-      let sale_product = $('#sale_product').val().trim();
+      let id_product = $('#id_product').val().trim();
+      let amount = $('#amount').val().trim();
       const editorData = editor.getData();
-      if (files.length > 0 && name_product != "" && price_product != "" && id_category != "" && sale_product != "") {
-        fd.append('file', files[0]);
-        fd.append('name_product', name_product);
-        fd.append('price_product', price_product);
-        fd.append('id_category', id_category);
-        fd.append('sale_product', sale_product);
-        fd.append('content', editorData);
-        fd.append('type', 'add');
+      if (id_product && amount) {
         $.ajax({
-          url: 'models/product.php',
-          type: 'POST',
-          data: fd,
-          contentType: false,
-          processData: false,
+          url: `models/order.php?type=add_o&id_p=${id_product}&a=${amount}`,
+          type: 'GET',
           success: function(response) {
             let data = JSON.parse(response);
             if (data.status == 'success') {
@@ -227,6 +212,50 @@
           text: "Vui lòng nhập đầy đủ thông tin",
         });
       }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script>
+    function caculateOrder() {
+      
+    }
+
+    function getProById() {
+      let id_product = $('#id_product').val().trim();
+      $.ajax({
+        type: "GET",
+        url: `models/order.php?type=id_p&id_product=${id_product}`,
+        dataType: "json",
+        success: function(data) {
+          $('#name_product').val(data.name_product);
+          $('#price_product').val(data.price);
+          $('#sale_product').val(data.sale);
+          $('#name_product').val(data.name_product);
+          $('#image-show1').fadeOut(0);
+          $('#image-show').fadeIn(0);
+          $('#image-show').attr('src', '<?= BASE_URL ?>/assets/upload/' + data.image);
+        }
+      });
+    }
+
+    function formatState(state) {
+      if (!state.id) {
+        return state.text;
+      }
+      var baseUrl = "<?= BASE_URL ?>/assets/upload";
+      var $state = $(
+        `<span>
+          <img 
+          src="${baseUrl}/${state.element.attributes.thumbnail.nodeValue}" 
+          class="img-flag" />
+          <span class="ml-4">${state.text}</span>
+        </span>`
+      );
+      return $state;
+    };
+
+    $("#id_product").select2({
+      templateResult: formatState
     });
   </script>
 </body>

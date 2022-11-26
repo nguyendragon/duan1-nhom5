@@ -41,7 +41,7 @@
 
     <div class="flex justify-evenly px-10">
         <div class="m-2">
-            <a href="<?= BASE_URL ?>"><img src="<?= BASE_URL ?>/public/images/img03.png" alt="" width="120px"></a>
+            <a href="<?= BASE_URL ?>"><img src="<?= BASE_URL ?>/public/images/img03.png?e=<?=time()?>" alt="" width="120px"></a>
         </div>
         <div class="dropdown">
             <button class="dropbtn1 flex">

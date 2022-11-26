@@ -1,4 +1,5 @@
 <?php
+header("X-Frame-Options: SAMEORIGIN");
 spl_autoload_register(function ($class) {
 	include_once 'system/libs/' . $class . '.php';
 });

@@ -2,46 +2,33 @@
 include_once "../config.php";
 include_once "../Core.php";
 $dragon = new System;
+$dragon->check_login();
 if (isset($_GET['type'])) {
-  if ($_GET['type'] == 'add') {
+  if ($_GET['type'] == 'add_o') {
     try {
-      $name_product = addslashes($_POST['name_product']);
-      $price_product = addslashes($_POST['price_product']);
-      $id_category = addslashes($_POST['id_category']);
-      $sale_product = addslashes($_POST['sale_product']);
-      $content = addslashes($_POST['content']);
+      $id_p = addslashes($_GET['id_p']);
+      $a = addslashes($_GET['a']);
+      $user = $dragon->userInfo();
+      $id_u = $user['id_user'];
 
-      $filename = $_FILES['file']['name'];
-      $random = rand(10000, 99999);
-      $location = $_SERVER['DOCUMENT_ROOT'] . "/seller/assets/upload/" . $random . "_" . $filename;
-
-      $id_restaurant = $dragon->restaurant();
-      $imageFileType = pathinfo($location, PATHINFO_EXTENSION);
-      $imageFileType = strtolower($imageFileType);
-      $valid_extensions = array("jpg", "jpeg", "png", "jfif");
-
-      if (in_array(strtolower($imageFileType), $valid_extensions)) {
-        $check = move_uploaded_file($_FILES['file']['tmp_name'], $location);
-        if ($check) {
-          $res = mysqli_query($dragon->connect(), "INSERT INTO product SET 
-            name_product = '" . $name_product . "'
-            ,image = '" . $random . "_" . $filename . "'
-            ,price = '" . $price_product . "'
-            ,sale = '" . $sale_product . "'
-            ,voucher = '0'
-            ,detail = '" . $content . "'
-            ,vote = '5'
-            ,id_restaurant = '" . $id_restaurant['id_restaurant'] . "'
-            ,id_cate  = '" . $id_category . "'
-            , create_at = '" . $dragon->time() . "' 
+      if ($id_p && $a) {
+        $product = mysqli_query($dragon->connect(), "SELECT * FROM product WHERE id_product = '" . $id_p . "'")->fetch_array();
+        $res = mysqli_query($dragon->connect(), "INSERT INTO orders SET 
+            amount = '" . $a . "'
+            ,sale = '" . $product['sale'] . "'
+            ,price = '" . $product['price'] . "'
+            ,total = '" .  ($product['price'] * $a) - ($product['sale'] * $a) . "'
+            ,status_order = 1
+            ,id_product = '" . $product['id_product'] . "'
+            ,id_restaurant = '" . $product['id_restaurant'] . "'
+            ,id_user  = '" . $id_u . "'
+            , create_at = '" . date("Y-m-d") . "' 
             , time = '" . time() . "' 
             ");
-          $result = $dragon->res_json('success', 'Thêm món ăn thành công');
-          echo json_encode($result);
-          exit();
-        }
+        $result = $dragon->res_json('success', 'Thêm đơn hàng thành công');
+        echo json_encode($result);
       } else {
-        $result = $dragon->res_json('error', 'File không đúng định dạng !');
+        $result = $dragon->res_json('error', 'Vui lòng nhập đầy đủ thông tin !');
         echo json_encode($result);
       }
     } catch (\Throwable $th) {
@@ -56,26 +43,27 @@ if (isset($_GET['type'])) {
       $id_order = addslashes($_GET['id_order']);
       $status = addslashes($_GET['status']);
       echo $id_order;
-      $res = mysqli_query($dragon->connect(), "UPDATE orders SET status_order = $status WHERE id_order = '".$id_order."'");
-        $result = $dragon->res_json('success', 'Sửa món ăn thành công');
-        echo json_encode($result);
-        header("location: " . BASE_URL . "/orders-list.php");
+      $res = mysqli_query($dragon->connect(), "UPDATE orders SET status_order = $status WHERE id_order = '" . $id_order . "'");
+      $result = $dragon->res_json('success', 'Sửa món ăn thành công');
+      echo json_encode($result);
+      header("location: " . BASE_URL . "/orders-list.php");
     } catch (\Throwable $th) {
       var_dump($th);
       $result = $dragon->res_json('error', 'Lỗi hệ thống! Vui lòng thử lại sau!');
       echo json_encode($result);
     }
   }
-}
 
-if (isset($_GET['type'])) {
-  if ($_GET['type'] == 'delete') {
-    $id_product = $_GET['id_product'];
-    if ($id_product) {
-      $res = mysqli_query($dragon->connect(), "DELETE FROM `product` WHERE id_product = $id_product");
-      header("location: " . BASE_URL . "/product-list.php");
-    } else {
-      header("location: " . BASE_URL . "/product-list.php");
+  if ($_GET['type'] == 'id_p') {
+    try {
+      $id_product = addslashes($_GET['id_product']);
+      $res = mysqli_query($dragon->connect(), "SELECT * FROM product WHERE id_product = '" . $id_product . "'")->fetch_array();
+      echo json_encode($res);
+      // header("location: " . BASE_URL . "/orders-list.php");
+    } catch (\Throwable $th) {
+      var_dump($th);
+      $result = $dragon->res_json('error', 'Lỗi hệ thống! Vui lòng thử lại sau!');
+      echo json_encode($result);
     }
   }
 }

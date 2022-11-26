@@ -7,10 +7,10 @@ class ordermodel extends DModel{
         parent::__construct();
     }
 
-    public function addOrders($amount, $sale, $price, $total, $id_product, $id_user, $create_at, $time)
-    {
-        $sql = "INSERT INTO orders SET amount=?,sale=?,price=?,total=?,id_product=?,id_user=?,create_at=?,time=?";
-        return $this->db->pdo_execute($sql, $amount, $sale, $price, $total, $id_product, $id_user, $create_at, $time);
+    public function addOrders($amount, $sale, $price, $total, $id_product, $id_restaurant, $id_user, $create_at, $time)
+    { 
+        $sql = "INSERT INTO orders SET amount=?,sale=?,price=?,total=?,id_product=?,id_restaurant=?,id_user=?,create_at=?,time=?";
+        return $this->db->pdo_execute($sql, $amount, $sale, $price, $total, $id_product, $id_restaurant, $id_user, $create_at, $time);
     }
 
     public function listOrders($status, $id_user){

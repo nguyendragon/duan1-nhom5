@@ -2,6 +2,7 @@
 include_once "../config.php";
 include_once "../Core.php";
 $dragon = new System;
+$dragon->check_login();
 if (isset($_POST['type'])) {
   if ($_POST['type'] == 'add') {
     try {

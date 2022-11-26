@@ -242,7 +242,7 @@
 		public function register_customer(){
 			$email = addslashes($_POST['email']);
 			$password = md5(addslashes($_POST['password']));
-			$create_at = date("d M Y, H:i a");
+			$create_at = date("Y-m-d"); 
 			$time = time();
 			$usermodel = $this->load->model('usermodel');
 

@@ -27,6 +27,21 @@
 			$this->load->view('details_restaurant', $data);
 		}
 
+		// public function restauranById($id){
+		// 	$restaurant_model = $this->load->model('restaurantmodel');
+		// 	$category_model = $this->load->model('categorymodel');
+		// 	$product_model = $this->load->model('productmodel');
+		// 	$data['restaurant'] = $restaurant_model->restaurantById($id);
+
+		// 	$id_res = $data['restaurant']['id_restaurant'];
+		// 	$id_cate = $data['restaurant']['id_cate']; 
+			
+		// 	$data['category'] = $category_model->categoryById($id_cate);
+		// 	$data['product'] = $product_model->productByIdRes($id_res);
+
+		// 	$this->load->view('details_restaurant', $data);
+		// }
+
 	}
 
 

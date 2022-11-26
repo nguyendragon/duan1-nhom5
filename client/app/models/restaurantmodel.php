@@ -16,6 +16,11 @@ class restaurantmodel extends DModel{
         $sql = "SELECT * FROM restaurants WHERE link =?";
         return $this->db->pdo_query_one($sql, $link);
     }
+
+    // public function restaurantById($id){
+    //     $sql = "SELECT * FROM restaurants WHERE id_restaurant =?";
+    //     return $this->db->pdo_query_one($sql, $id);
+    // }
 }
 
 ?>
